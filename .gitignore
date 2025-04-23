@@ -14,5 +14,8 @@ inventory.ini
 # SSL configuration
 config/ssl/*.pem
 
+# Ansible
+.ansible
+
 # Env file
 .env
