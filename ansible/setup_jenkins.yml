@@ -99,3 +99,7 @@
       community.docker.docker_compose_v2:
         project_src: "/home/{{ ansible_user }}/config/"
         files: compose.yml
+
+    - name: Print initial password
+      debug:
+        msg: "{{ lookup('file', '/var/jenkins_home/secrets/initialAdminPassword') }}"
