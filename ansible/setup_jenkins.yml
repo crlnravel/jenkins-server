@@ -1,0 +1,95 @@
+---
+- name: Prepare dependencies
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Update apt
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - vim
+          - net-tools
+          - python3
+          - python3-pip
+        state: present
+
+    - name: Delete existing keyrings
+      file:
+        path: /etc/apt/keyrings
+        state: absent
+
+    - name: Create dir for keyrings
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+- name: Prepare Docker
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Prepare python pip for Ansible interaction with Docker
+      pip:
+        name:
+          - docker
+          - docker-compose
+        state: present
+
+    - name: Add Docker GPG key
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+        force: true
+
+    - name: Add Docker apt repository
+      apt_repository:
+        repo:
+          "deb [arch={{ ansible_architecture | replace('x86_64', 'amd64') }} signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+        update_cache: true
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+- name: Run Jenkins
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Clear configs
+      file:
+        path: "/home/{{ ansible_user }}/config"
+        state: absent
+
+    - name: Copy whole configs to bootstrap Jenkins installation
+      copy:
+        src: "{{ playbook_dir }}/../config"
+        dest: "/home/{{ ansible_user }}"
+
+    - name: Run Jenkins
+      community.docker.docker_compose_v2:
+        project_src: "/home/{{ ansible_user }}/config/"
+        files: compose.yml

@@ -1,0 +1,18 @@
+# VSCode
+.vscode
+
+.idea
+
+# Generate IP address
+inventory.ini
+
+# Terraform
+*.tfstate
+*.terraform/
+*.tfvars
+
+# SSL configuration
+config/ssl/*.pem
+
+# Env file
+.env
