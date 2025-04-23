@@ -8,6 +8,7 @@ inventory.ini
 
 # Terraform
 *.tfstate
+*.tfstate*
 *.terraform/
 *.tfvars
 
@@ -18,4 +19,4 @@ config/ssl/*.pem
 .ansible
 
 # Env file
-.env
+*.env

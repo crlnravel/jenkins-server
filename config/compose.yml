@@ -23,13 +23,15 @@ services:
   nginx:
     # default ports 80, 443 - expose mapping as needed to host
     image: nginx:1
+    depends_on:
+      - jenkins
     container_name: cicd-nginx
     restart: unless-stopped
     networks:
       - jenkins
     ports:
-      - "8080:80"    # http
-      - "8443:443"   # https
+      - "80:80"    # http
+      - "443:443"   # https
     volumes:
       - ${JENKINS_LOCAL_HOME}:/var/jenkins_home
       - ${NGINX_CONF}:/etc/nginx/conf.d/default.conf
