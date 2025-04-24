@@ -78,28 +78,34 @@
   become: true
   gather_facts: true
 
+  vars:
+    - home: "/home/{{ ansible_user }}"
+    - config_home: "{{ home }}/config"
+
   tasks:
     - name: Clear configs
       file:
-        path: "/home/{{ ansible_user }}/config"
+        path: "{{ config_home }}"
         state: absent
 
     - name: Copy whole configs to bootstrap Jenkins installation
       copy:
         src: "{{ playbook_dir }}/../config"
-        dest: "/home/{{ ansible_user }}"
+        dest: "{{ home }}"
+
+    - name: Ensure .env file exists
+      file:
+        path: "{{ config_home }}/.env"
+        state: file
 
     - name: Delete running containers
       community.docker.docker_compose_v2:
-        project_src: "/home/{{ ansible_user }}/config/"
+        project_src: "{{ config_home }}"
         files: compose.yml
         state: absent
 
     - name: Run Jenkins
       community.docker.docker_compose_v2:
-        project_src: "/home/{{ ansible_user }}/config/"
+        project_src: "{{ config_home }}"
         files: compose.yml
-
-    - name: Print initial password
-      debug:
-        msg: "{{ lookup('file', '/var/jenkins_home/secrets/initialAdminPassword') }}"
+  
